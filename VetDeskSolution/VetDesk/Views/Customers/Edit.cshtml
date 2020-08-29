@@ -1,0 +1,64 @@
+﻿@model VetDesk.Entity.Customer
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Customer</h4>
+<hr />
+<div class="row">
+    <div class="col-md-10">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="FullName" class="control-label"></label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Phone" class="control-label"></label>
+                <input asp-for="Phone" class="form-control" />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save Changes" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+<h4>Customer's Critters</h4>
+<hr/>
+<span class="btn btn-light">
+    @Html.ActionLink("Add Critter", "Create", "Critters", new { customerId = Model.Id })
+</span>
+<table class="table">
+    @foreach (var crit in Model.Critters)
+    {
+        <tr>
+            <td>
+                <a asp-controller="Critters" asp-action="Edit" asp-route-id="@crit.Id">
+                    @Html.DisplayFor(m => crit.Name)
+                </a>
+            </td>
+            <td>
+                <img src='@Url.Action("GetCritterImage", "Critters", new { critterId = crit.Id })' 
+                     style="max-height:200px;max-width:200px;height:auto;width:auto"/>
+            </td>
+        </tr>
+    }
+</table>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
