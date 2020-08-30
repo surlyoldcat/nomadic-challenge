@@ -18,6 +18,7 @@ namespace VetDesk.Entity
         public virtual DbSet<Critter> Critters { get; set; }
         public virtual DbSet<CritterType> CritterTypes { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
+        public virtual DbSet<Photo> Photos { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -42,7 +43,8 @@ namespace VetDesk.Entity
                     .IsRequired()
                     .HasMaxLength(50);
 
-                entity.Property(e => e.Photo).HasColumnType("image");
+                entity.Property(e => e.PhotoId)
+                .IsRequired();
 
                 entity.HasOne(d => d.CritterType)
                     .WithMany(p => p.Critter)
@@ -55,6 +57,26 @@ namespace VetDesk.Entity
                     .HasForeignKey(d => d.CustomerId)
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("FK_Customer_Critter");
+
+                
+            });
+
+            modelBuilder.Entity<Photo>(entity =>
+            {
+                entity.ToTable("Photo");
+                entity.Property(p => p.FileName)
+                .IsRequired()
+                .HasMaxLength(128);
+
+                entity.Property(p => p.PhotoFile)
+                .IsRequired()
+                .HasColumnType("image");
+
+                entity.Property(p => p.ContentType)
+                .IsRequired()
+                .HasMaxLength(50);
+
+                
             });
 
             modelBuilder.Entity<CritterType>(entity =>

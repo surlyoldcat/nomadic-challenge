@@ -1,14 +1,11 @@
-﻿@model IEnumerable<VetDesk.Entity.Critter>
+﻿@model IEnumerable<VetDesk.Models.CritterListModel>
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>All the Critters!</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>
@@ -16,49 +13,34 @@
                 @Html.DisplayNameFor(model => model.Name)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.LastWeight)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Color)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Photo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CritterType)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.Customer)
             </th>
-            <th></th>
+            <th>
+                @Html.DisplayNameFor(model => model.Type)
+            </th>
+            <th>
+                Photo
+            </th>
         </tr>
     </thead>
     <tbody>
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Name)
+                <a asp-action="Edit" asp-route-id="@item.Id">
+                    @Html.DisplayFor(modelItem => item.Name)
+                    </a>
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.LastWeight)
+                @Html.DisplayFor(modelItem => item.Customer)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Color)
+                @Html.DisplayFor(modelItem => item.Type)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Photo)
+           <td>
+                <img src='@item.ImageUrl' style="max-height:50px;max-width:200px;height:auto;width:auto" />
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CritterType.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Customer.Email)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
+            
         </tr>
 }
     </tbody>

@@ -11,7 +11,7 @@ namespace VetDesk.Entity
         public decimal LastWeight { get; set; }
         public int CritterTypeId { get; set; }
         public string Color { get; set; }
-        public byte[] Photo { get; set; }
+        public int PhotoId { get; set; }
 
         public virtual CritterType CritterType { get; set; }
         public virtual Customer Customer { get; set; }

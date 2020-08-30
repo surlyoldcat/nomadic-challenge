@@ -34,6 +34,7 @@ namespace VetDesk
 
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddScoped<ICritterRepository, CritterRepository>();
+            services.AddScoped<IPhotoRepository, PhotoRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

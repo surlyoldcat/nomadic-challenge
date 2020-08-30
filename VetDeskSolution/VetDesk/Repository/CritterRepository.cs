@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VetDesk.Entity;
+using VetDesk.Models;
 
 namespace VetDesk.Repository
 {
@@ -12,6 +14,7 @@ namespace VetDesk.Repository
         void Delete(int id);
         bool DoesCritterExist(int id);
         Critter FetchCritter(int id);
+        Critter FetchCritterNoTracking(int id);
         IEnumerable<Critter> ListCritters(ListFetchOptions options);
         IEnumerable<Critter> ListCrittersForCustomer(int customerId);
         IEnumerable<CritterType> ListCritterTypes();
@@ -28,25 +31,45 @@ namespace VetDesk.Repository
             context = db;
         }
 
+        //yes, this really should be in a separate repo, but that
+        //can easily be refactored later.
         public IEnumerable<CritterType> ListCritterTypes()
         {
             return context.CritterTypes.OrderBy(ct => ct.Description);
         }
 
+        public Critter FetchCritterNoTracking(int id)
+        {
+            return context.Critters
+                .Include(cr => cr.Customer)
+                .Include(cr => cr.CritterType)
+                .AsNoTracking()
+                .FirstOrDefault(cr => cr.Id == id);
+        }
+
         public Critter FetchCritter(int id)
         {
-            return context.Critters.FirstOrDefault(cr => cr.Id == id);
+            return context.Critters
+                .Include(cr => cr.Customer)
+                .Include(cr => cr.CritterType)
+                .FirstOrDefault(cr => cr.Id == id);
         }
 
         public IEnumerable<Critter> ListCritters(ListFetchOptions options)
         {
             //TODO handle options
-            return context.Critters.OrderBy(cr => cr.Name);
+            return context.Critters
+                .Include(cr => cr.Customer)
+                .Include(cr => cr.CritterType)
+                .OrderBy(cr => cr.Name);
         }
 
         public IEnumerable<Critter> ListCrittersForCustomer(int customerId)
         {
-            return context.Critters.Where(cr => cr.CustomerId == customerId)
+            return context.Critters
+                .Include(cr => cr.Customer)
+                .Include(cr => cr.CritterType)
+                .Where(cr => cr.CustomerId == customerId)
                 .OrderBy(cr => cr.Name);
         }
 

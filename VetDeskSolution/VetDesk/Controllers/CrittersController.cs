@@ -9,55 +9,42 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using VetDesk.Entity;
+using VetDesk.Models;
 using VetDesk.Repository;
 
-namespace VetDesk.Views
+namespace VetDesk.Controllers
 {
     public class CrittersController : Controller
     {
         private readonly ICritterRepository critterRepo;
         private readonly ICustomerRepository customerRepo;
+        private readonly IPhotoRepository photoRepo;
 
-        public CrittersController(ICustomerRepository custRepo, ICritterRepository critRepo)
+        public CrittersController(ICustomerRepository custRepo, ICritterRepository critRepo, IPhotoRepository phRepo)
         {
             critterRepo = critRepo;
             customerRepo = custRepo;
-        }
-
-        public IActionResult GetCritterImage(int? critterId)
-        {
-            if (!critterId.HasValue)
-                return NotFound();
-
-            var crit = critterRepo.FetchCritter(critterId.Value);
-            return File(crit.Photo, "image/jpeg");
-
+            photoRepo = phRepo;
         }
 
         // GET: Critters
         public IActionResult Index()
         {
-            var q = critterRepo.ListCritters(ListFetchOptions.DefaultOptions);
+            var q = critterRepo.ListCritters(ListFetchOptions.DefaultOptions)
+                .OrderBy(cr => cr.Name)
+                .Select(cr => new CritterListModel
+                {
+                    Id = cr.Id,
+                    Name = cr.Name,
+                    Customer = cr.Customer.FullName,
+                    Type = cr.CritterType.Description,
+                    ImageUrl = Url.Action("Get", "Photos", new { Id = cr.PhotoId})
+                });
+            
             return View(q.ToList());
         }
 
-        // GET: Critters/Details/5
-        public IActionResult Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var critter = critterRepo.FetchCritter(id.Value);
-            if (critter == null)
-            {
-                return NotFound();
-            }
-
-            return View(critter);
-        }
-
+       
         // GET: Critters/Create?customerId=5
         public IActionResult Create(int? customerId)
         {
@@ -82,16 +69,18 @@ namespace VetDesk.Views
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("Id,CustomerId,Name,LastWeight,CritterTypeId,Color,Photo")] Critter critter,
-            IFormFile photo)
+        public IActionResult Create([Bind("Id,CustomerId,Name,LastWeight,CritterTypeId,Color")] Critter critter)
         {
+            if (!HttpContext.Request.Form.Files.Any())
+            {
+                ModelState.AddModelError("PhotoId", "Image file is missing");
+            }
+
             if (ModelState.IsValid)
             {
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    photo.CopyTo(ms);
-                    critter.Photo = ms.ToArray();
-                }
+                IFormFile photo = HttpContext.Request.Form.Files[0];   
+                int photoId = InsertPhoto(photo);
+                critter.PhotoId = photoId;
                 critterRepo.Create(critter);
                 //we want to go back to the Customer edit page
                 //return RedirectToAction(nameof(Index));
@@ -104,7 +93,6 @@ namespace VetDesk.Views
             
             
         }
-
         // GET: Critters/Edit/5
         public IActionResult Edit(int? id)
         {
@@ -128,7 +116,7 @@ namespace VetDesk.Views
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind("Id,CustomerId,Name,LastWeight,CritterTypeId,Color,Photo")] Critter critter)
+        public IActionResult Edit(int id, [Bind("Id,CustomerId,Name,LastWeight,CritterTypeId,Color")] Critter critter)
         {
             if (id != critter.Id)
             {
@@ -181,7 +169,10 @@ namespace VetDesk.Views
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {
+            var cr = critterRepo.FetchCritterNoTracking(id);
+            photoRepo.Delete(cr.PhotoId);
             critterRepo.Delete(id);
+            //TODO add ability to intelligently return to the correct  list view
             return RedirectToAction(nameof(Index));
         }
 
@@ -205,6 +196,22 @@ namespace VetDesk.Views
         {
             var types = critterRepo.ListCritterTypes();
             return new SelectList(types, "Id", "Description", id);
+        }
+
+        private int InsertPhoto(IFormFile ff)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ff.CopyTo(ms);
+                Photo p = new Photo
+                {
+                    FileName = ff.FileName,
+                    ContentType = ff.ContentType,
+                    PhotoFile = ms.ToArray()
+                };
+                var savedPhoto = photoRepo.Create(p);
+                return savedPhoto.Id;
+            }
         }
 
     }

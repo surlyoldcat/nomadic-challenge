@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using VetDesk.Entity;
 using VetDesk.Models;
 using VetDesk.Repository;
 
-namespace VetDesk.Views
+namespace VetDesk.Controllers
 {
     public class CustomersController : Controller
     {
