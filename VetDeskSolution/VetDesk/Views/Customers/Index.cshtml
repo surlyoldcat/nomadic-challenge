@@ -1,47 +1,40 @@
-﻿@model IEnumerable<VetDesk.Models.CustomerListModel>
+﻿@model IQueryable<VetDesk.Entity.Customer>
 
 @{
     ViewData["Title"] = "Index";
 }
 
+@section Styles {
+    <link href="@Url.Content("~/css/mvc-grid/mvc-grid.css")" rel="stylesheet">
+}
 <h1>Customers</h1>
 
 <p>
     <a asp-action="Create">Create a new Customer</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                Name
-            </th>
-            <th>
-                Phone
-            </th>
-            <th>
-                # Critters
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">
-                    @Html.DisplayFor(modelItem => item.Name)
-                    </a>
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Phone)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NumCritters)
-            </td>
-            <td>
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+
+@(Html
+    .Grid(Model)
+    .Build(columns =>
+    {
+        columns.Add(model => model.FullName).Titled("Name")
+            .RenderedAs(c => Html.ActionLink(c.FullName, "Edit", new { Id = c.Id }));
+        columns.Add(model => model.Phone).Titled("Phone");
+        columns.Add(model => model.Email).Titled("Email");
+
+        columns.Add(model => model.Critters.Count()).Titled("# Critters");
+
+    })
+    .Using(GridFilterMode.Header)
+    .Empty("No data found")
+    .Filterable()
+    .Sortable()
+    .Pageable()
+)
+
+@section Scripts {
+    <script src="@Url.Content("~/js/mvc-grid/mvc-grid.js")"></script>
+    <script>
+           document.querySelectorAll(".mvc-grid").forEach(element => new MvcGrid(element));
+    </script>
 }
-    </tbody>
-</table>

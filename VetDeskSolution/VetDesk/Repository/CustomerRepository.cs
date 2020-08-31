@@ -9,19 +9,18 @@ namespace VetDesk.Repository
 {
     public interface ICustomerRepository
     {
-        IEnumerable<Customer> ListCustomers(ListFetchOptions options);
         Customer FetchCustomer(int id);
         Customer CreateCustomer(Customer c);
         void UpdateCustomer(Customer c);
         void DeleteCustomer(int id);
         bool DoesCustomerExist(int id);
+        IQueryable<Customer> CustomersQueryable();
     }
 
     public class CustomerRepository : ICustomerRepository, IDisposable
     {
         private readonly VetDeskContext context;
         
-
         public CustomerRepository(VetDeskContext db)
         {
             context = db;
@@ -42,12 +41,14 @@ namespace VetDesk.Repository
             context.SaveChanges();
         }
 
-        public IEnumerable<Customer> ListCustomers(ListFetchOptions options)
+        public IQueryable<Customer> CustomersQueryable()
         {
-            //TODO handle the options
-            var query = context.Customers.OrderBy(c => c.FullName);
-            return query;
+            return context.Customers
+                .Include(c => c.Critters)
+                .AsNoTracking();
         }
+
+        
 
         public Customer FetchCustomer(int id)
         {

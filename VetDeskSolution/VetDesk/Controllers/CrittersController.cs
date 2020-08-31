@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -14,6 +15,7 @@ using VetDesk.Repository;
 
 namespace VetDesk.Controllers
 {
+    [Authorize]
     public class CrittersController : Controller
     {
         private readonly ICritterRepository critterRepo;
@@ -30,18 +32,8 @@ namespace VetDesk.Controllers
         // GET: Critters
         public IActionResult Index()
         {
-            var q = critterRepo.ListCritters(ListFetchOptions.DefaultOptions)
-                .OrderBy(cr => cr.Name)
-                .Select(cr => new CritterListModel
-                {
-                    Id = cr.Id,
-                    Name = cr.Name,
-                    Customer = cr.Customer.FullName,
-                    Type = cr.CritterType.Description,
-                    ImageUrl = Url.Action("Get", "Photos", new { Id = cr.PhotoId})
-                });
-            
-            return View(q.ToList());
+            IQueryable<Critter> critters = critterRepo.CrittersQueryable();
+            return View(critters);
         }
 
        
@@ -69,7 +61,7 @@ namespace VetDesk.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("Id,CustomerId,Name,LastWeight,CritterTypeId,Color")] Critter critter)
+        public IActionResult Create([Bind("Id,CustomerId,Name,LastWeight,CritterTypeId,Color,PhotoId")] Critter critter)
         {
             if (!HttpContext.Request.Form.Files.Any())
             {
@@ -116,18 +108,29 @@ namespace VetDesk.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind("Id,CustomerId,Name,LastWeight,CritterTypeId,Color")] Critter critter)
+        public IActionResult Edit(int id, [Bind("Id,CustomerId,Name,LastWeight,CritterTypeId,Color,PhotoId")] Critter critter)
         {
             if (id != critter.Id)
             {
                 return NotFound();
             }
 
+            if (critter.PhotoId == 0)
+            {
+                ModelState.AddModelError("PhotoId", "PhotoId was set to 0.");
+            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
+                    
                     critterRepo.Update(critter);
+                    if (HttpContext.Request.Form.Files.Any())
+                    {
+                        IFormFile photo = HttpContext.Request.Form.Files[0];
+                        UpdatePhoto(photo, critter.PhotoId);
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -169,8 +172,10 @@ namespace VetDesk.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {
-            var cr = critterRepo.FetchCritterNoTracking(id);
-            photoRepo.Delete(cr.PhotoId);
+            var photoId = critterRepo.CrittersQueryable()
+                .First(cr => cr.Id == id)
+                .PhotoId;
+            photoRepo.Delete(photoId);
             critterRepo.Delete(id);
             //TODO add ability to intelligently return to the correct  list view
             return RedirectToAction(nameof(Index));
@@ -187,7 +192,7 @@ namespace VetDesk.Controllers
             }
             else
             {
-                custList = customerRepo.ListCustomers(ListFetchOptions.DefaultOptions);
+                custList = customerRepo.CustomersQueryable().ToList();
             }
             return new SelectList(custList, "Id", "Email"); ;
         }
@@ -196,6 +201,21 @@ namespace VetDesk.Controllers
         {
             var types = critterRepo.ListCritterTypes();
             return new SelectList(types, "Id", "Description", id);
+        }
+
+        private void UpdatePhoto(IFormFile ff, int photoId)
+        {
+            var photo = photoRepo.Fetch(photoId);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ff.CopyTo(ms);
+                photo.FileName = ff.FileName;
+                photo.ContentType = ff.ContentType;
+                photo.PhotoFile = ms.ToArray();
+
+                var savedPhoto = photoRepo.Update(photo);
+                
+            }
         }
 
         private int InsertPhoto(IFormFile ff)

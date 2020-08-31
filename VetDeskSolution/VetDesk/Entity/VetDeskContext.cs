@@ -1,10 +1,11 @@
 ﻿using System;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace VetDesk.Entity
 {
-    public partial class VetDeskContext : DbContext
+    public partial class VetDeskContext : IdentityDbContext<VetDeskUser>
     {
         public VetDeskContext()
         {
@@ -30,6 +31,7 @@ namespace VetDesk.Entity
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Critter>(entity =>
             {
                 entity.ToTable("Critter");

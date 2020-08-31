@@ -1,47 +1,38 @@
-﻿@model IEnumerable<VetDesk.Models.CritterListModel>
+﻿@model IQueryable<VetDesk.Entity.Critter>
 
 @{
     ViewData["Title"] = "Index";
 }
-
+@section Styles {
+    <link href="@Url.Content("~/css/mvc-grid/mvc-grid.css")" rel="stylesheet">
+}
 <h1>All the Critters!</h1>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Customer)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Type)
-            </th>
-            <th>
-                Photo
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">
-                    @Html.DisplayFor(modelItem => item.Name)
-                    </a>
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Customer)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Type)
-            </td>
-           <td>
-                <img src='@item.ImageUrl' style="max-height:50px;max-width:200px;height:auto;width:auto" />
-            </td>
-            
-        </tr>
+@(Html
+    .Grid(Model)
+    .Build(columns =>
+    {
+        columns.Add(model => model.Name).Titled("Name")
+            .RenderedAs(c => Html.ActionLink(c.Name, "Edit", new { Id = c.Id }));
+        columns.Add(model => model.Customer.FullName).Titled("Customer");
+        columns.Add(model => model.CritterType.Description).Titled("Type");
+        columns.Add(model => model.PhotoId).Titled("Photo")
+        .Encoded(false)
+        .Filterable(false)
+        .Sortable(false)
+        .RenderedAs(c => $"<img src='{@Url.Action("Get", "Photos", new { Id = c.PhotoId })}' style='max-height:100px;height:auto;width:auto' />");
+
+    })
+    .Using(GridFilterMode.Header)
+    .Empty("No data found")
+    .Filterable()
+    .Sortable()
+    .Pageable()
+)
+
+@section Scripts {
+    <script src="@Url.Content("~/js/mvc-grid/mvc-grid.js")"></script>
+    <script>
+           document.querySelectorAll(".mvc-grid").forEach(element => new MvcGrid(element));
+    </script>
 }
-    </tbody>
-</table>

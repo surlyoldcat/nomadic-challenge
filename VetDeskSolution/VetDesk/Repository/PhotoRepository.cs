@@ -55,6 +55,7 @@ namespace VetDesk.Repository
 
             context.Photos.Update(p);
             context.SaveChanges();
+            RemoveFromCache(p.Id);
             return Fetch(p.Id);
         }
 
@@ -65,12 +66,20 @@ namespace VetDesk.Repository
 
             var p = new Photo { Id = id };
             context.Remove(p);
+            RemoveFromCache(id);
             context.SaveChanges();
         }
 
         public bool DoesPhotoExist(int id)
         {
             return context.Photos.Any(p => p.Id == id);
+        }
+
+        private void RemoveFromCache(int id)
+        {
+            cache.TryGetValue<Photo>(id, out Photo p);
+            if (null != p)
+                cache.Remove(id);
         }
 
         #region Disposable pattern

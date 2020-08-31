@@ -14,11 +14,9 @@ namespace VetDesk.Repository
         void Delete(int id);
         bool DoesCritterExist(int id);
         Critter FetchCritter(int id);
-        Critter FetchCritterNoTracking(int id);
-        IEnumerable<Critter> ListCritters(ListFetchOptions options);
-        IEnumerable<Critter> ListCrittersForCustomer(int customerId);
         IEnumerable<CritterType> ListCritterTypes();
         void Update(Critter c);
+        IQueryable<Critter> CrittersQueryable();
     }
 
     public class CritterRepository : ICritterRepository, IDisposable
@@ -38,39 +36,22 @@ namespace VetDesk.Repository
             return context.CritterTypes.OrderBy(ct => ct.Description);
         }
 
-        public Critter FetchCritterNoTracking(int id)
+        public IQueryable<Critter> CrittersQueryable()
         {
             return context.Critters
                 .Include(cr => cr.Customer)
                 .Include(cr => cr.CritterType)
-                .AsNoTracking()
-                .FirstOrDefault(cr => cr.Id == id);
+                .AsNoTracking();
+
         }
 
+       
         public Critter FetchCritter(int id)
         {
             return context.Critters
                 .Include(cr => cr.Customer)
                 .Include(cr => cr.CritterType)
                 .FirstOrDefault(cr => cr.Id == id);
-        }
-
-        public IEnumerable<Critter> ListCritters(ListFetchOptions options)
-        {
-            //TODO handle options
-            return context.Critters
-                .Include(cr => cr.Customer)
-                .Include(cr => cr.CritterType)
-                .OrderBy(cr => cr.Name);
-        }
-
-        public IEnumerable<Critter> ListCrittersForCustomer(int customerId)
-        {
-            return context.Critters
-                .Include(cr => cr.Customer)
-                .Include(cr => cr.CritterType)
-                .Where(cr => cr.CustomerId == customerId)
-                .OrderBy(cr => cr.Name);
         }
 
         public Critter Create(Critter c)

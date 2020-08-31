@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VetDesk.Entity;
@@ -10,6 +11,7 @@ using VetDesk.Repository;
 
 namespace VetDesk.Controllers
 {
+    [Authorize]
     public class CustomersController : Controller
     {
         private readonly ICustomerRepository customerRepo;
@@ -24,11 +26,8 @@ namespace VetDesk.Controllers
         // GET: Customers
         public IActionResult Index()
         {
-            var customers = customerRepo.ListCustomers(ListFetchOptions.DefaultOptions)
-                .Select(c => CustomerListModel.CreateFrom(c))
-                .ToList();
             
-            return View(customers);
+            return View(customerRepo.CustomersQueryable());
         }
 
         // GET: Customers/Details/5

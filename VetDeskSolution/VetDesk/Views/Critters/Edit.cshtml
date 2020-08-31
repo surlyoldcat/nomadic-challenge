@@ -8,7 +8,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" enctype="multipart/form-data" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
@@ -36,7 +36,11 @@
                 <input asp-for="Color" class="form-control" />
                 <span asp-validation-for="Color" class="text-danger"></span>
             </div>
-           
+            <div class="form-group">
+                <label class="control-label">New Photo</label>
+                <input type="file" name="newPhoto" onchange="PreviewPhoto(this)">
+                <input type="hidden" asp-for="PhotoId" />
+            </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
                 <input type="button" class="btn btn-light" onclick="history.go(-1)" value="Cancel" />
@@ -45,7 +49,24 @@
             </div>
         </form>
     </div>
+    <div class="col-md-2">
+        Photo:
+        <img id="imgPreview" src="@Url.Action("Get", "Photos", new { Id=Model.PhotoId})" style="max-height:600px;max-width:600px;height:auto;width:auto" />
+    </div>
 </div>
+
+<script>
+    function PreviewPhoto(input) {
+            if (input.files && input.files[0]) {
+                var fr = new FileReader();
+                fr.onload = function(e) {
+                    var imgElement = document.getElementById("imgPreview");
+                    imgElement.src = e.target.result;
+                }
+                fr.readAsDataURL(input.files[0]);
+            }
+        }
+</script>
 
 
 @section Scripts {
