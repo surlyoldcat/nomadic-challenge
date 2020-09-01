@@ -33,6 +33,7 @@ namespace VetDesk
             services.AddDbContext<VetDeskContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("VetDeskDb"))
                 );
+            //set up Identity to use our existing DBContext
             services.AddDefaultIdentity<VetDeskUser>(options => options.SignIn.RequireConfirmedAccount = true)
                     .AddEntityFrameworkStores<VetDeskContext>();
             services.Configure<IdentityOptions>(options =>
@@ -48,7 +49,7 @@ namespace VetDesk
             });
            
             
-
+            // add custom injectables
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddScoped<ICritterRepository, CritterRepository>();
             services.AddScoped<IPhotoRepository, PhotoRepository>();
