@@ -29,7 +29,11 @@
     .Empty("No data found")
     .Filterable()
     .Sortable()
-    .Pageable()
+    .Pageable(pager =>
+    {
+        pager.RowsPerPage = 5;
+    })
+
 )
 
 @section Scripts {

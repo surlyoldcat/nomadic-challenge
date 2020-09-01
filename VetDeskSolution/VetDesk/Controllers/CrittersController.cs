@@ -48,17 +48,7 @@ namespace VetDesk.Controllers
             return View();
         }
 
-        // GET: Critters/Create
-        //public IActionResult Create()
-        //{
-        //    ViewData["CritterTypeId"] = new SelectList(_context.CritterTypes, "Id", "Description");
-        //    ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "Email");
-        //    return View();
-        //}
-
-        // POST: Critters/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("Id,CustomerId,Name,LastWeight,CritterTypeId,Color,PhotoId")] Critter critter)
@@ -117,14 +107,13 @@ namespace VetDesk.Controllers
 
             if (critter.PhotoId == 0)
             {
-                ModelState.AddModelError("PhotoId", "PhotoId was set to 0.");
+                ModelState.AddModelError("PhotoId", "Invalid PhotoId.");
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    
                     critterRepo.Update(critter);
                     if (HttpContext.Request.Form.Files.Any())
                     {
