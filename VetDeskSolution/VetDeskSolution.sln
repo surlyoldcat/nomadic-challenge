@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30413.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VetDesk", "VetDesk\VetDesk.csproj", "{22D20624-948E-4DD6-9F00-B1040A85C6BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VetDesk.UnitTest", "VetDesk.UnitTest\VetDesk.UnitTest.csproj", "{CCE3C5B3-CFB3-4F4C-8D5D-BF7D9E128D9B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VetDesk.UnitTest", "VetDesk.UnitTest\VetDesk.UnitTest.csproj", "{CCE3C5B3-CFB3-4F4C-8D5D-BF7D9E128D9B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
