@@ -23,6 +23,8 @@
 4. Update connection string in appsettings.json.
 5. Hope that EF doesn't get offended.
 
+*If you receive SQL permission errors, make sure that the vetdesk SQL login has been added to the database, and has the 'db_owner' role.*
+
 ## Notes
 - The user registration process is the very most basic available. There is no email confirmation or other advanced functionality. It's easily available in Identity, however.
 - There are no limits/rules around image file sizes. In real life, image upload would be managed in much stricter fashion, not just using multipart form uploads.
